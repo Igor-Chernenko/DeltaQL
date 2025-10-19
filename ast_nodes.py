@@ -194,33 +194,72 @@ class ASTTransformer(Transformer):
     def comparison(self, items):
         if len(items) == 1:
             return items[0]
+        
+        # Items come in as [left, op, right] or [left, op, right, op, right, ...]
         result = items[0]
         i = 1
         while i < len(items):
-            op = items[i].value if isinstance(items[i], Token) else items[i]
-            right = items[i + 1]
-            result = BinaryOp(left=result, operator=op, right=right)
-            i += 2
+            # The operator is at position i
+            if isinstance(items[i], Token):
+                op = items[i].value
+            else:
+                # Sometimes Lark inlines the token
+                op = str(items[i])
+            
+            # The right operand is at position i+1
+            if i + 1 < len(items):
+                right = items[i + 1]
+                result = BinaryOp(left=result, operator=op, right=right)
+                i += 2
+            else:
+                break
+        
         return result
     
     def addition(self, items):
+        if len(items) == 1:
+            return items[0]
+        
         result = items[0]
         i = 1
         while i < len(items):
-            op = items[i].value if isinstance(items[i], Token) else items[i]
-            right = items[i + 1]
-            result = BinaryOp(left=result, operator=op, right=right)
-            i += 2
+            # The operator is at position i
+            if isinstance(items[i], Token):
+                op = items[i].value
+            else:
+                op = str(items[i])
+            
+            # The right operand is at position i+1
+            if i + 1 < len(items):
+                right = items[i + 1]
+                result = BinaryOp(left=result, operator=op, right=right)
+                i += 2
+            else:
+                break
+        
         return result
     
     def multiplication(self, items):
+        if len(items) == 1:
+            return items[0]
+        
         result = items[0]
         i = 1
         while i < len(items):
-            op = items[i].value if isinstance(items[i], Token) else items[i]
-            right = items[i + 1]
-            result = BinaryOp(left=result, operator=op, right=right)
-            i += 2
+            # The operator is at position i
+            if isinstance(items[i], Token):
+                op = items[i].value
+            else:
+                op = str(items[i])
+            
+            # The right operand is at position i+1
+            if i + 1 < len(items):
+                right = items[i + 1]
+                result = BinaryOp(left=result, operator=op, right=right)
+                i += 2
+            else:
+                break
+        
         return result
     
     def unary(self, items):
