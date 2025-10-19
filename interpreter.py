@@ -5,7 +5,7 @@ Implements visitor pattern to execute AST nodes.
 
 from ast_nodes import *
 from environment import Environment
-from builtins import get_builtins
+from builtin import get_builtins
 
 
 class ReturnException(Exception):
