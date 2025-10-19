@@ -1,0 +1,37 @@
+// DeltaQL Debug Demo
+var db1_path = "database1.db"
+var db2_path = "database2.db"
+var tolerance = 0.1
+var tables = ["users", "orders", "products"]
+
+function compare_databases(db_name_a, db_name_b, match_type) {
+    var conn1 = connect(db_name_a)
+    var conn2 = connect(db_name_b)
+    
+    var passed_count = 0
+    var total_count = len(tables)
+    
+    for table in tables {
+        if table_exists(conn1, table) and table_exists(conn2, table) {
+            var result = compare_table(conn1, conn2, table, match_type, tolerance)
+            
+            // Debug output
+            print("Table:")
+            print(table)
+            print("Passed:")
+            print(result["passed"])
+            
+            if result["passed"] {
+                passed_count = passed_count + 1
+            }
+        }
+    }
+    
+    var percentage = (passed_count / total_count) * 100
+    return percentage
+}
+
+var exact_match_percentage = compare_databases(db1_path, db2_path, "exact")
+print("Final percentage:")
+print(exact_match_percentage)
+

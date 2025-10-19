@@ -1,5 +1,5 @@
 """
-Validation and comparison logic for DataVal language.
+Validation and comparison logic for DeltaQL language.
 Implements exact and fuzzy matching for database tables.
 """
 
@@ -86,15 +86,18 @@ def exact_match_comparison(rows1, rows2, primary_key):
     # Calculate match rate
     total_rows_db1 = len(rows1)
     total_rows_db2 = len(rows2)
-    max_rows = max(total_rows_db1, total_rows_db2)
     
-    if max_rows == 0:
-        match_rate = 100.0
+    # Use the number of keys that exist in both databases
+    common_keys = set(dict1.keys()) & set(dict2.keys())
+    total_comparable = len(common_keys)
+    
+    if total_comparable == 0:
+        match_rate = 0.0
+        passed = False
     else:
-        match_rate = (matching_rows / max_rows) * 100
-    
-    # Determine if validation passed (100% match)
-    passed = (match_rate == 100.0)
+        match_rate = (matching_rows / total_comparable) * 100
+        # Table passes if all comparable rows match AND row counts are the same
+        passed = (matching_rows == total_comparable) and (total_rows_db1 == total_rows_db2)
     
     return {
         "passed": passed,
@@ -146,15 +149,18 @@ def fuzzy_match_comparison(rows1, rows2, primary_key, tolerance):
     # Calculate match rate
     total_rows_db1 = len(rows1)
     total_rows_db2 = len(rows2)
-    max_rows = max(total_rows_db1, total_rows_db2)
     
-    if max_rows == 0:
-        match_rate = 100.0
+    # Use the number of keys that exist in both databases
+    common_keys = set(dict1.keys()) & set(dict2.keys())
+    total_comparable = len(common_keys)
+    
+    if total_comparable == 0:
+        match_rate = 0.0
+        passed = False
     else:
-        match_rate = (matching_rows / max_rows) * 100
-    
-    # Determine if validation passed (100% match with tolerance)
-    passed = (match_rate == 100.0)
+        match_rate = (matching_rows / total_comparable) * 100
+        # Table passes if all comparable rows match AND row counts are the same
+        passed = (matching_rows == total_comparable) and (total_rows_db1 == total_rows_db2)
     
     return {
         "passed": passed,
@@ -202,55 +208,4 @@ def fuzzy_rows_match(row1, row2, tolerance):
                 return False
     
     return True
-### **9. demo/demo.dv** (Demo Program)
-"""
-// DataVal Demo Program
-// Demonstrates all language features through database validation
 
-// Variables: Store database paths and configuration
-
-var db1_path = "database1.db"
-var db2_path = "database2.db"
-var tolerance = 0.1
-var tables = ["users", "orders", "products"]
-
-// Function: Compare two databases and return match percentage
-function compare_databases(db_name_a, db_name_b, match_type) {
-    // Open connections to both databases
-    var conn1 = connect(db_name_a)
-    var conn2 = connect(db_name_b)
-    
-    // Initialize counters
-    var passed_count = 0
-    var total_count = len(tables)
-    
-    // Loop: Iterate through all tables
-    for table in tables {
-        // Conditional: Check if table exists in both databases
-        if table_exists(conn1, table) and table_exists(conn2, table) {
-            // Call built-in compare_table function
-            var result = compare_table(conn1, conn2, table, match_type, tolerance)
-            
-            // Conditional: Check if this table passed validation
-            if result["passed"] {
-                passed_count = passed_count + 1
-            }
-        }
-    }
-    
-    // Calculate match percentage
-    var percentage = (passed_count / total_count) * 100
-    
-    // Return the result
-    return percentage
-}
-
-// Call function with exact matching mode
-var exact_match_percentage = compare_databases(db1_path, db2_path, "exact")
-print(exact_match_percentage)
-
-// Call function with fuzzy matching mode
-var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy")
-print(fuzzy_match_percentage)
-
-"""
