@@ -7,10 +7,10 @@ var db2_path = "database2.db"
 var tolerance = 0.1
 
 // Function: Compare two databases and return match percentage
-function compare_databases(db_name_a, db_name_b, match_type) {
+function compare_databases(db_path_a, db_path_b, match_type) {
     // Open connections to both databases
-    var conn1 = connect(db_name_a)
-    var conn2 = connect(db_name_b)
+    var conn1 = connect(db_path_a)
+    var conn2 = connect(db_path_b)
     
     // Auto-discover all tables from first database
     var tables = get_tables(conn1)
