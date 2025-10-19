@@ -1,4 +1,7 @@
-# Documentation
+# Delta QL Documentation
+## What is it
+It's an interpreted programming language built using Python and LARK that is optimized and made to be as efficient as possible for analyzing Datasets
+
 ## Declaring Variables
 var local_db_path = "./database1.db" //saves as string type
 var tables = ["users", "orders", "products"] //Uses python Lists
