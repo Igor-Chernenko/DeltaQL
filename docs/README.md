@@ -26,3 +26,5 @@ compare_table(conn1, conn2, table, Fuzzy)  //Checks if two tables are equal, usi
 
 ## Crediting
 We acknowledge the use of Anthropic’s Claude Sonnet 4.5 during development. It assisted in drafting the initial HTML report scaffolding and refining example snippets that informed our Lark grammar documentation. We reviewed, tested, and modified all generated code to meet our project’s requirements and quality standards. Any remaining mistakes or omissions are ours alone.
+
+[htmlCode.pdf](https://github.com/user-attachments/files/22992985/htmlCode.pdf)
