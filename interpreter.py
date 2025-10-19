@@ -1,5 +1,5 @@
 """
-Core interpreter for DataVal language.
+Core interpreter for DeltaQL language.
 Implements visitor pattern to execute AST nodes.
 """
 
@@ -15,7 +15,7 @@ class ReturnException(Exception):
 
 
 class Interpreter:
-    """Main interpreter class that executes DataVal programs."""
+    """Main interpreter class that executes DeltaQL programs."""
     
     def __init__(self):
         """Initialize the interpreter with global environment."""
@@ -29,7 +29,7 @@ class Interpreter:
     
     def execute(self, program):
         """
-        Execute a DataVal program.
+        Execute a DeltaQL program.
         
         Args:
             program: Program AST node
@@ -133,6 +133,9 @@ class Interpreter:
         elif isinstance(expr, ListLiteral):
             return [self.evaluate_expression(e) for e in expr.elements]
         
+        elif isinstance(expr, IndexAccess):
+            return self.evaluate_index_access(expr)
+        
         elif isinstance(expr, BinaryOp):
             return self.evaluate_binary_op(expr)
         
@@ -144,6 +147,24 @@ class Interpreter:
         
         else:
             raise TypeError(f"Unknown expression type: {type(expr)}")
+    
+    def evaluate_index_access(self, expr):
+        """Evaluate index access (dict[key] or list[index])."""
+        obj = self.evaluate_expression(expr.object)
+        index = self.evaluate_expression(expr.index)
+        
+        if isinstance(obj, dict):
+            if index not in obj:
+                raise KeyError(f"Key '{index}' not found in dictionary")
+            return obj[index]
+        elif isinstance(obj, list):
+            if not isinstance(index, int):
+                raise TypeError(f"List indices must be integers, not {type(index).__name__}")
+            if index < 0 or index >= len(obj):
+                raise IndexError(f"List index out of range: {index}")
+            return obj[index]
+        else:
+            raise TypeError(f"Cannot index {type(obj).__name__} object")
     
     def evaluate_binary_op(self, expr):
         """Evaluate binary operation."""

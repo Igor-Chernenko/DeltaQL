@@ -1,4 +1,4 @@
-// DataVal Language Grammar Definition
+// DeltaQL Language Grammar Definition
 
 ?start: program
 
@@ -46,7 +46,9 @@ COMP_OP: "==" | "!=" | "<=" | ">=" | "<" | ">"
 
 ?unary: "not" unary
       | "-" unary
-      | atom
+      | postfix
+
+?postfix: atom ("[" expr "]")*
 
 ?atom: NUMBER           -> number
      | STRING           -> string

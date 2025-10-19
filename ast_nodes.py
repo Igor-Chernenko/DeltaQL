@@ -1,5 +1,5 @@
 """
-Abstract Syntax Tree node definitions for DataVal language.
+Abstract Syntax Tree node definitions for DeltaQL language.
 """
 
 from lark import Transformer, Token
@@ -113,6 +113,13 @@ class ListLiteral(ASTNode):
     elements: List[ASTNode]
 
 
+@dataclass
+class IndexAccess(ASTNode):
+    """Index access: object[index]"""
+    object: ASTNode
+    index: ASTNode
+
+
 # Transformer to convert Lark parse tree to AST
 class ASTTransformer(Transformer):
     """Transforms Lark parse tree into AST."""
@@ -221,6 +228,15 @@ class ASTTransformer(Transformer):
             return items[0]
         op = items[0].value if isinstance(items[0], Token) else items[0]
         return UnaryOp(operator=op, operand=items[1])
+    
+    def postfix(self, items):
+        """Handle index access: obj[index]"""
+        result = items[0]
+        # Process any index accesses
+        for i in range(1, len(items)):
+            index = items[i]
+            result = IndexAccess(object=result, index=index)
+        return result
     
     def function_call(self, items):
         name = items[0].value
