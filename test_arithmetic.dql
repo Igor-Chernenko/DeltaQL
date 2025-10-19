@@ -1,0 +1,22 @@
+
+var x = 5
+print(x)
+
+var y = x + 3
+print(y)
+
+var z = 10
+z = z + 1
+print(z)
+
+
+function test_add() {
+    var a = 0
+    a = a + 1
+    a = a + 1
+    return a
+}
+
+var result = test_add()
+print(result)
+

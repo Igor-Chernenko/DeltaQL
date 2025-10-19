@@ -41,8 +41,11 @@ expr_stmt: expr
 ?comparison: addition (COMP_OP addition)*
 COMP_OP: "==" | "!=" | "<=" | ">=" | "<" | ">"
 
-?addition: multiplication (("+"|"-") multiplication)*
-?multiplication: unary (("*"|"/") unary)*
+?addition: multiplication (ADD_OP multiplication)*
+ADD_OP: "+" | "-"
+
+?multiplication: unary (MUL_OP unary)*
+MUL_OP: "*" | "/"
 
 ?unary: "not" unary
       | "-" unary

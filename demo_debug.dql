@@ -1,4 +1,4 @@
-// DeltaQL Debug Demo
+
 var db1_path = "database1.db"
 var db2_path = "database2.db"
 var tolerance = 0.1

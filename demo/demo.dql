@@ -7,6 +7,10 @@ var db2_path = "database2.db"
 var tolerance = 0.1
 var tables = ["users", "orders", "products"]
 
+var x = 4
+x = x/2
+
+
 // Function: Compare two databases and return match percentage
 function compare_databases(db_name_a, db_name_b, match_type) {
     // Open connections to both databases
@@ -27,13 +31,12 @@ function compare_databases(db_name_a, db_name_b, match_type) {
             // Conditional: Check if this table passed validation
             if result["passed"] {
                 passed_count = passed_count + 1
+                
             }
         }
     }
-    
     // Calculate match percentage
     var percentage = (passed_count / total_count) * 100
-    
     // Return the result
     return percentage
 }
@@ -45,4 +48,6 @@ print(exact_match_percentage)
 // Call function with fuzzy matching mode
 var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy")
 print(fuzzy_match_percentage)
+
+
 
