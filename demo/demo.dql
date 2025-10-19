@@ -1,15 +1,10 @@
 // DeltaQL Demo Program
 // Demonstrates all language features through database validation
 
-// Variables: Store database paths and configuration
+// Configuration: Database paths and tolerance
 var db1_path = "database1.db"
 var db2_path = "database2.db"
 var tolerance = 0.1
-var tables = ["users", "orders", "products"]
-
-var x = 4
-x = x/2
- 
 
 // Function: Compare two databases and return match percentage
 function compare_databases(db_name_a, db_name_b, match_type) {
@@ -17,11 +12,14 @@ function compare_databases(db_name_a, db_name_b, match_type) {
     var conn1 = connect(db_name_a)
     var conn2 = connect(db_name_b)
     
+    // Auto-discover all tables from first database
+    var tables = get_tables(conn1)
+    
     // Initialize counters
     var passed_count = 0
     var total_count = len(tables)
     
-    // Loop: Iterate through all tables
+    // Loop: Iterate through all discovered tables
     for table in tables {
         // Conditional: Check if table exists in both databases
         if table_exists(conn1, table) and table_exists(conn2, table) {
@@ -31,12 +29,13 @@ function compare_databases(db_name_a, db_name_b, match_type) {
             // Conditional: Check if this table passed validation
             if result["passed"] {
                 passed_count = passed_count + 1
-                
             }
         }
     }
+    
     // Calculate match percentage
     var percentage = (passed_count / total_count) * 100
+    
     // Return the result
     return percentage
 }
@@ -48,6 +47,4 @@ print(exact_match_percentage)
 // Call function with fuzzy matching mode
 var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy")
 print(fuzzy_match_percentage)
-
-
 
