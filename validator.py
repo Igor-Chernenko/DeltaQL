@@ -202,16 +202,13 @@ def fuzzy_rows_match(row1, row2, tolerance):
                 return False
     
     return True
-```
-
----
-
 ### **9. demo/demo.dv** (Demo Program)
-```
+"""
 // DataVal Demo Program
 // Demonstrates all language features through database validation
 
 // Variables: Store database paths and configuration
+
 var db1_path = "database1.db"
 var db2_path = "database2.db"
 var tolerance = 0.1
@@ -256,3 +253,4 @@ print(exact_match_percentage)
 var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy")
 print(fuzzy_match_percentage)
 
+"""
