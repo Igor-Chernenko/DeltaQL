@@ -1,9 +1,10 @@
 """
-Database operations for DataVal language.
+Database operations for DeltaQL language.
 Handles SQLite connections and queries.
 """
 
 import sqlite3
+import os
 
 
 class DatabaseConnection:
@@ -17,8 +18,23 @@ class DatabaseConnection:
             db_path: Path to SQLite database file
         """
         self.db_path = db_path
+        self.db_name = self._extract_db_name(db_path)
         self.connection = sqlite3.connect(db_path)
         self.connection.row_factory = sqlite3.Row  # Enable column access by name
+    
+    def _extract_db_name(self, path):
+        """
+        Extract database name from path.
+        
+        Args:
+            path: Full path to database file
+            
+        Returns:
+            Database name without path or extension
+        """
+        basename = os.path.basename(path)
+        name = os.path.splitext(basename)[0]
+        return name
     
     def get_tables(self):
         """

@@ -6,8 +6,8 @@ var db1_path = "database1.db"
 var db2_path = "database2.db"
 var tolerance = 0.1
 
-// Function: Compare two databases and return match percentage
-function compare_databases(db_name_a, db_name_b, match_type) {
+// Function: Compare two databases with optional report generation
+function compare_databases(db_name_a, db_name_b, match_type, output_type) {
     // Open connections to both databases
     var conn1 = connect(db_name_a)
     var conn2 = connect(db_name_b)
@@ -15,9 +15,10 @@ function compare_databases(db_name_a, db_name_b, match_type) {
     // Auto-discover all tables from first database
     var tables = get_tables(conn1)
     
-    // Initialize counters
+    // Initialize counters and results collection
     var passed_count = 0
     var total_count = len(tables)
+    var results = []
     
     // Loop: Iterate through all discovered tables
     for table in tables {
@@ -26,6 +27,9 @@ function compare_databases(db_name_a, db_name_b, match_type) {
             // Call built-in compare_table function
             var result = compare_table(conn1, conn2, table, match_type, tolerance)
             
+            // Collect result for potential report generation
+            results = results + [result]
+            
             // Conditional: Check if this table passed validation
             if result["passed"] {
                 passed_count = passed_count + 1
@@ -33,18 +37,33 @@ function compare_databases(db_name_a, db_name_b, match_type) {
         }
     }
     
-    // Calculate match percentage
-    var percentage = (passed_count / total_count) * 100
+    // Check output type and return accordingly
+    if output_type == "report" {
+        // Generate HTML report
+        var report_file = generate_html_report(results, match_type, conn1, conn2)
+        return report_file
+    }
     
-    // Return the result
+    // Default: return percentage
+    var percentage = (passed_count / total_count) * 100
     return percentage
 }
 
-// Call function with exact matching mode
-var exact_match_percentage = compare_databases(db1_path, db2_path, "exact")
-print(exact_match_percentage)
+// Example 1: Get percentage for exact matching
+var exact_match_percentage = compare_databases(db1_path, db2_path, "exact", "percent")
+print("============================================================")
+print("Match Percentage: " + str(exact_match_percentage) + "%")
+print("============================================================")
 
-// Call function with fuzzy matching mode
-var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy")
-print(fuzzy_match_percentage)
+// Example 2: Get percentage for fuzzy matching
+var fuzzy_match_percentage = compare_databases(db1_path, db2_path, "fuzzy", "percent")
+print("============================================================")
+print("Match Percentage: " + str(fuzzy_match_percentage) + "%")
+print("============================================================")
+
+// Example 3: Generate HTML report for exact matching
+var exact_report = compare_databases(db1_path, db2_path, "exact", "report")
+
+// Example 4: Generate HTML report for fuzzy matching
+var fuzzy_report = compare_databases(db1_path, db2_path, "fuzzy", "report")
 

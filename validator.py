@@ -55,7 +55,7 @@ def exact_match_comparison(rows1, rows2, primary_key):
         primary_key: Name of primary key column
         
     Returns:
-        Dictionary with comparison results
+        Dictionary with comparison results including detailed differences
     """
     # Create dictionaries keyed by primary key
     dict1 = {row[primary_key]: row for row in rows1}
@@ -65,12 +65,23 @@ def exact_match_comparison(rows1, rows2, primary_key):
     all_keys = set(dict1.keys()) | set(dict2.keys())
     
     matching_rows = 0
-    total_differences = 0
+    differences = []
     
     for key in all_keys:
         # Check if key exists in both
-        if key not in dict1 or key not in dict2:
-            total_differences += 1
+        if key not in dict1:
+            differences.append({
+                'type': 'extra_in_db2',
+                'key': key,
+                'row': dict2[key]
+            })
+            continue
+        elif key not in dict2:
+            differences.append({
+                'type': 'missing_in_db2',
+                'key': key,
+                'row': dict1[key]
+            })
             continue
         
         # Compare rows
@@ -81,7 +92,21 @@ def exact_match_comparison(rows1, rows2, primary_key):
         if row1 == row2:
             matching_rows += 1
         else:
-            total_differences += 1
+            # Find specific column differences
+            row_diffs = []
+            for col in row1.keys():
+                if row1[col] != row2[col]:
+                    row_diffs.append({
+                        'column': col,
+                        'value_db1': row1[col],
+                        'value_db2': row2[col]
+                    })
+            
+            differences.append({
+                'type': 'value_diff',
+                'key': key,
+                'column_diffs': row_diffs
+            })
     
     # Calculate match rate
     total_rows_db1 = len(rows1)
@@ -104,7 +129,8 @@ def exact_match_comparison(rows1, rows2, primary_key):
         "total_rows_db1": total_rows_db1,
         "total_rows_db2": total_rows_db2,
         "matching_rows": matching_rows,
-        "match_rate": match_rate
+        "match_rate": match_rate,
+        "differences": differences
     }
 
 
@@ -119,7 +145,7 @@ def fuzzy_match_comparison(rows1, rows2, primary_key, tolerance):
         tolerance: Numeric tolerance for comparisons
         
     Returns:
-        Dictionary with comparison results
+        Dictionary with comparison results including detailed differences
     """
     # Create dictionaries keyed by primary key
     dict1 = {row[primary_key]: row for row in rows1}
@@ -129,22 +155,39 @@ def fuzzy_match_comparison(rows1, rows2, primary_key, tolerance):
     all_keys = set(dict1.keys()) | set(dict2.keys())
     
     matching_rows = 0
-    total_differences = 0
+    differences = []
     
     for key in all_keys:
         # Check if key exists in both
-        if key not in dict1 or key not in dict2:
-            total_differences += 1
+        if key not in dict1:
+            differences.append({
+                'type': 'extra_in_db2',
+                'key': key,
+                'row': dict2[key]
+            })
+            continue
+        elif key not in dict2:
+            differences.append({
+                'type': 'missing_in_db2',
+                'key': key,
+                'row': dict1[key]
+            })
             continue
         
         # Compare rows with fuzzy logic
         row1 = dict1[key]
         row2 = dict2[key]
         
-        if fuzzy_rows_match(row1, row2, tolerance):
+        matches, row_diffs = fuzzy_rows_match_with_details(row1, row2, tolerance)
+        
+        if matches:
             matching_rows += 1
         else:
-            total_differences += 1
+            differences.append({
+                'type': 'value_diff',
+                'key': key,
+                'column_diffs': row_diffs
+            })
     
     # Calculate match rate
     total_rows_db1 = len(rows1)
@@ -167,13 +210,14 @@ def fuzzy_match_comparison(rows1, rows2, primary_key, tolerance):
         "total_rows_db1": total_rows_db1,
         "total_rows_db2": total_rows_db2,
         "matching_rows": matching_rows,
-        "match_rate": match_rate
+        "match_rate": match_rate,
+        "differences": differences
     }
 
 
-def fuzzy_rows_match(row1, row2, tolerance):
+def fuzzy_rows_match_with_details(row1, row2, tolerance):
     """
-    Check if two rows match with fuzzy comparison.
+    Check if two rows match with fuzzy comparison and return details.
     
     Args:
         row1: First row dictionary
@@ -181,11 +225,13 @@ def fuzzy_rows_match(row1, row2, tolerance):
         tolerance: Numeric tolerance
         
     Returns:
-        Boolean indicating if rows match within tolerance
+        Tuple of (matches: bool, differences: list)
     """
     # Check if they have the same columns
     if set(row1.keys()) != set(row2.keys()):
-        return False
+        return False, []
+    
+    differences = []
     
     # Compare each column
     for col in row1.keys():
@@ -196,16 +242,29 @@ def fuzzy_rows_match(row1, row2, tolerance):
         if val1 is None and val2 is None:
             continue
         elif val1 is None or val2 is None:
-            return False
+            differences.append({
+                'column': col,
+                'value_db1': val1,
+                'value_db2': val2
+            })
+            continue
         
         # Numeric comparison with tolerance
         if isinstance(val1, (int, float)) and isinstance(val2, (int, float)):
             if abs(val1 - val2) > tolerance:
-                return False
+                differences.append({
+                    'column': col,
+                    'value_db1': val1,
+                    'value_db2': val2
+                })
         # Exact comparison for other types
         else:
             if val1 != val2:
-                return False
+                differences.append({
+                    'column': col,
+                    'value_db1': val1,
+                    'value_db2': val2
+                })
     
-    return True
+    return len(differences) == 0, differences
 
